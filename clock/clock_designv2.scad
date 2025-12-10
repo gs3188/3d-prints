@@ -26,12 +26,13 @@ module milky_way_pattern(r, depth) {
         rand_r = random(i * 7.123) * r * 0.85;
         rand_angle = random(i * 3.456) * 360;
         star_size = 0.5 + random(i * 9.876) * 1.2;
+        star_height = depth + 1 + random(i * 11.234) * depth * 2;  // Random height variation
         
         x = rand_r * cos(rand_angle);
         y = rand_r * sin(rand_angle);
         
         translate([x, y, -0.5])
-            cylinder(r=star_size, h=depth + 1, $fn=8);
+            cylinder(r=star_size, h=star_height, $fn=8);
     }
     
     // Milky way band - flowing organic cloud structures across the disc
@@ -47,25 +48,27 @@ module milky_way_pattern(r, depth) {
         
         if(random(i * 234.567) < density) {
             cloud_size = 2 + random(i * 8.901) * 5;
-            scatter_x = (random(i * 4.567) - 0.5) * 20;
-            scatter_y = (random(i * 7.890) - 0.5) * 25;
+            cloud_height = depth + 1 + random(i * 13.579) * depth * 3;  // Random height variation
+            scatter_x = (random(i * 4.567) - 0.5) * 45;
+            scatter_y = (random(i * 7.890) - 0.5) * 50;
             
             translate([path_x + scatter_x, path_y + scatter_y, -0.5])
-                cylinder(r=cloud_size, h=depth + 1, $fn=8);
+                cylinder(r=cloud_size, h=cloud_height, $fn=8);
         }
     }
     
     // Additional wispy tendrils
-    for(k=[0:30]) {
+    for(k=[0:50]) {
         tendril_angle = random(k * 15.678) * 360;
-        tendril_dist = 20 + random(k * 23.456) * 40;
+        tendril_dist = 10 + random(k * 23.456) * 70;
         tendril_size = 1.5 + random(k * 34.567) * 2.5;
+        tendril_height = depth + 1 + random(k * 67.890) * depth * 1.5;  // Random height variation
         
-        tendril_x = tendril_dist * cos(tendril_angle) + (random(k * 45.678) - 0.5) * 15;
-        tendril_y = tendril_dist * sin(tendril_angle) + (random(k * 56.789) - 0.5) * 15;
+        tendril_x = tendril_dist * cos(tendril_angle) + (random(k * 45.678) - 0.5) * 30;
+        tendril_y = tendril_dist * sin(tendril_angle) + (random(k * 56.789) - 0.5) * 30;
         
         translate([tendril_x, tendril_y, -0.5])
-            cylinder(r=tendril_size, h=depth + 1, $fn=6);
+            cylinder(r=tendril_size, h=tendril_height, $fn=6);
     }
 }
 
@@ -91,8 +94,8 @@ module topography_disc(r=120, thickness=4, center_hole_d=3){
                     linear_extrude(height=thickness + 2)
                         offset(r=4.5)
                             offset(delta=-4.5)
-                                translate([-5, -8])
-                                    square([10, 16]);
+                                translate([-8, -5])
+                                    square([16, 10]);
         }
         
         // Keep within disc bounds
@@ -142,8 +145,8 @@ module housing(r=125, depth=20, clockwork_slot_size=55, rim_width=5, disc_recess
                         linear_extrude(height=disc_recess_depth)
                             offset(r=4)
                                 offset(delta=-4)
-                                    translate([-5, -8])
-                                        square([10, 16]);
+                                    translate([-8, -5])
+                                        square([16, 10]);
             }
         }
         
@@ -155,12 +158,12 @@ module housing(r=125, depth=20, clockwork_slot_size=55, rim_width=5, disc_recess
             // Subtract the protrusions from the recess so they remain
             for(angle=[0, 90, 180, 270]) {
                 rotate([0, 0, angle])
-                    translate([r - rim_width - 10, 0, depth - disc_recess_depth - 0.5])
+                    translate([r - rim_width - 10, 0, depth - disc_recess_depth])
                         linear_extrude(height=disc_recess_depth + 1)
                             offset(r=3)
                                 offset(delta=-4)
-                                    translate([-5, -8])
-                                        square([10, 16]);
+                                    translate([-8, -5])
+                                        square([16, 10]);
             }
         }
         
