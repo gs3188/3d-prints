@@ -18,10 +18,10 @@ render_mode = 2;
 // Function to create flowing topographic contours
 module flowing_contour(center_x, center_y, base_r, num_lines, line_width, height_start) {
     for(i=[0:num_lines-1]) {
-        radius = base_r + i * 3;
-        height = height_start + i * 0.3;
+        radius = base_r + i * 2;
+        height = height_start + i * 0.2;
         
-        translate([center_x, center_y, 0])
+        translate([center_x-5, center_y, 0])
             linear_extrude(height=height)
                 difference() {
                     polygon([
@@ -50,26 +50,29 @@ module topography_disc(r=80, thickness=4, center_hole_d=3){
             // Base disc
             cylinder(r=r, h=thickness);
             
-            // Top-left terrain cluster (around 10-11 o'clock)
-            flowing_contour(-25, 35, 8, 8, 1.2, thickness + 0.3);
-            
-            // Top-right terrain cluster (around 1-2 o'clock)
-            flowing_contour(30, 30, 10, 7, 1.2, thickness + 0.3);
-            
-            // Bottom-left terrain cluster (around 7-8 o'clock)
-            flowing_contour(-30, -25, 9, 6, 1.2, thickness + 0.3);
-            
-            // Bottom-right terrain cluster (around 4-5 o'clock)
-            flowing_contour(28, -30, 11, 7, 1.2, thickness + 0.3);
-            
-            // Center cluster
-            flowing_contour(0, 0, 6, 5, 1.2, thickness + 0.2);
-            
-            // Additional smaller clusters for variety
-            flowing_contour(45, 0, 7, 4, 1.0, thickness + 0.2);
-            flowing_contour(-40, 0, 6, 4, 1.0, thickness + 0.2);
-            flowing_contour(0, 45, 5, 3, 1.0, thickness + 0.2);
-            flowing_contour(0, -40, 6, 3, 1.0, thickness + 0.2);
+            // Topographic contours in contrasting color
+            color([0.7, 0.5, 0.3]) {
+                // Top-left terrain cluster (around 10-11 o'clock)
+                flowing_contour(-25, 35, 8, 8, 1.2, thickness + 0.3);
+                
+                // Top-right terrain cluster (around 1-2 o'clock)
+                flowing_contour(30, 30, 10, 7, 1.2, thickness + 0.3);
+                
+                // Bottom-left terrain cluster (around 7-8 o'clock)
+                flowing_contour(-30, -25, 9, 6, 1.2, thickness + 0.3);
+                
+                // Bottom-right terrain cluster (around 4-5 o'clock)
+                flowing_contour(28, -30, 11, 7, 1.2, thickness + 0.3);
+                
+                // Center cluster
+                flowing_contour(0, 0, 6, 5, 1.2, thickness + 0.2);
+                
+                // Additional smaller clusters for variety
+                flowing_contour(45, 0, 7, 4, 1.0, thickness + 0.2);
+                flowing_contour(-40, 0, 6, 4, 1.0, thickness + 0.2);
+                flowing_contour(0, 45, 5, 3, 1.0, thickness + 0.2);
+                flowing_contour(0, -40, 6, 3, 1.0, thickness + 0.2);
+            }
         }
         
         // Center hole for clock mechanism
