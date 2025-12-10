@@ -13,66 +13,71 @@ $fn=100;
 // 4 = Hands only (for 3D printing)
 // 5 = Base only (for 3D printing)
 // 6 = Exploded view (all parts separated)
-render_mode = 2;
+render_mode = 1;
 
-// Function to create flowing topographic contours
-module flowing_contour(center_x, center_y, base_r, num_lines, line_width, height_start) {
-    for(i=[0:num_lines-1]) {
-        radius = base_r + i * 2;
-        height = height_start + i * 0.2;
+// Function to create milky way pattern - stars and flowing clouds
+module milky_way_pattern(r, depth) {
+    // Random seed for consistent pattern
+    function random(seed) = fract(sin(seed * 12.9898 + 78.233) * 43758.5453);
+    function fract(x) = x - floor(x);
+    
+    // Stars - small dots scattered across the disc
+    for(i=[0:300]) {
+        rand_r = random(i * 7.123) * r * 0.85;
+        rand_angle = random(i * 3.456) * 360;
+        star_size = 0.5 + random(i * 9.876) * 1.2;
         
-        translate([center_x-5, center_y, 0])
-            linear_extrude(height=height)
-                difference() {
-                    polygon([
-                        for(a=[0:5:360]) 
-                            let(angle=a,
-                                wave1=2 * sin(a * 2 + i * 30),
-                                wave2=1.5 * cos(a * 3 + i * 20))
-                            [(radius + line_width/2 + wave1 + wave2) * cos(angle), 
-                             (radius + line_width/2 + wave1 + wave2) * sin(angle)]
-                    ]);
-                    polygon([
-                        for(a=[0:5:360]) 
-                            let(angle=a,
-                                wave1=2 * sin(a * 2 + i * 30),
-                                wave2=1.5 * cos(a * 3 + i * 20))
-                            [(radius - line_width/2 + wave1 + wave2) * cos(angle), 
-                             (radius - line_width/2 + wave1 + wave2) * sin(angle)]
-                    ]);
-                }
+        x = rand_r * cos(rand_angle);
+        y = rand_r * sin(rand_angle);
+        
+        translate([x, y, -0.5])
+            cylinder(r=star_size, h=depth + 1, $fn=8);
+    }
+    
+    // Milky way band - flowing organic cloud structures across the disc
+    for(i=[0:120]) {
+        t = i / 120;
+        
+        // Create flowing path across disc
+        path_x = (t - 0.5) * r * 1.8 + 15 * sin(t * 360 * 2);
+        path_y = 10 * sin(t * 360 * 3) + 8 * cos(t * 360 * 5);
+        
+        // Variable density - more clouds in center of band
+        density = sin(t * 180) * sin(t * 180);
+        
+        if(random(i * 234.567) < density) {
+            cloud_size = 2 + random(i * 8.901) * 5;
+            scatter_x = (random(i * 4.567) - 0.5) * 20;
+            scatter_y = (random(i * 7.890) - 0.5) * 25;
+            
+            translate([path_x + scatter_x, path_y + scatter_y, -0.5])
+                cylinder(r=cloud_size, h=depth + 1, $fn=8);
+        }
+    }
+    
+    // Additional wispy tendrils
+    for(k=[0:30]) {
+        tendril_angle = random(k * 15.678) * 360;
+        tendril_dist = 20 + random(k * 23.456) * 40;
+        tendril_size = 1.5 + random(k * 34.567) * 2.5;
+        
+        tendril_x = tendril_dist * cos(tendril_angle) + (random(k * 45.678) - 0.5) * 15;
+        tendril_y = tendril_dist * sin(tendril_angle) + (random(k * 56.789) - 0.5) * 15;
+        
+        translate([tendril_x, tendril_y, -0.5])
+            cylinder(r=tendril_size, h=depth + 1, $fn=6);
     }
 }
 
-module topography_disc(r=80, thickness=4, center_hole_d=3){
+module topography_disc(r=120, thickness=4, center_hole_d=3){
     difference() {
         union() {
             // Base disc
             cylinder(r=r, h=thickness);
             
-            // Topographic contours in contrasting color
-            color([0.7, 0.5, 0.3]) {
-                // Top-left terrain cluster (around 10-11 o'clock)
-                flowing_contour(-25, 35, 8, 8, 1.2, thickness + 0.3);
-                
-                // Top-right terrain cluster (around 1-2 o'clock)
-                flowing_contour(30, 30, 10, 7, 1.2, thickness + 0.3);
-                
-                // Bottom-left terrain cluster (around 7-8 o'clock)
-                flowing_contour(-30, -25, 9, 6, 1.2, thickness + 0.3);
-                
-                // Bottom-right terrain cluster (around 4-5 o'clock)
-                flowing_contour(28, -30, 11, 7, 1.2, thickness + 0.3);
-                
-                // Center cluster
-                flowing_contour(0, 0, 6, 5, 1.2, thickness + 0.2);
-                
-                // Additional smaller clusters for variety
-                flowing_contour(45, 0, 7, 4, 1.0, thickness + 0.2);
-                flowing_contour(-40, 0, 6, 4, 1.0, thickness + 0.2);
-                flowing_contour(0, 45, 5, 3, 1.0, thickness + 0.2);
-                flowing_contour(0, -40, 6, 3, 1.0, thickness + 0.2);
-            }
+            // Milky way pattern as protrusions on the surface
+            translate([0, 0, thickness])
+                milky_way_pattern(r, 0.4);
         }
         
         // Center hole for clock mechanism
@@ -99,7 +104,7 @@ module topography_disc(r=80, thickness=4, center_hole_d=3){
     }
 }
 
-module hour_markers(r=80){
+module hour_markers(r=120){
     for(angle=[0,90,180,270]){
         rotate([0,0,angle])
             translate([r-10,0,2])
@@ -116,7 +121,7 @@ module hands(){
 }
 
 
-module housing(r=85, depth=20, clockwork_slot_size=55, rim_width=5, disc_recess_depth=5, slot_corner_radius=2, sleeve_wall=3, slot_clearance=0.5){
+module housing(r=125, depth=20, clockwork_slot_size=55, rim_width=5, disc_recess_depth=5, slot_corner_radius=2, sleeve_wall=3, slot_clearance=0.5){
     difference(){
         union() {
             // Main body
