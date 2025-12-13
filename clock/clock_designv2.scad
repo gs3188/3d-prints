@@ -13,7 +13,7 @@ $fn=100;
 // 4 = Hands only (for 3D printing)
 // 5 = Base only (for 3D printing)
 // 6 = Exploded view (all parts separated)
-render_mode = 1;
+render_mode = 5;
 
 // Function to create milky way pattern - stars and flowing clouds
 module milky_way_pattern(r, depth) {
@@ -72,7 +72,7 @@ module milky_way_pattern(r, depth) {
     }
 }
 
-module topography_disc(r=120, thickness=4, center_hole_d=3){
+module topography_disc(r=120, thickness=4, center_hole_d=6){
     difference() {
         union() {
             // Base disc
@@ -90,12 +90,12 @@ module topography_disc(r=120, thickness=4, center_hole_d=3){
         // Holes for housing protrusions at 12, 3, 6, 9 o'clock
         for(angle=[0, 90, 180, 270]) {
             rotate([0, 0, angle])
-                translate([r - 5 - 10, 0, -1])
+                translate([r - 15, 0, -1])
                     linear_extrude(height=thickness + 2)
                         offset(r=4.5)
                             offset(delta=-4.5)
-                                translate([-8, -5])
-                                    square([16, 10]);
+                                translate([-8.3, -5.3])
+                                    square([16.6, 10.6]);
         }
         
         // Keep within disc bounds
@@ -107,20 +107,25 @@ module topography_disc(r=120, thickness=4, center_hole_d=3){
     }
 }
 
-module hour_markers(r=120){
-    for(angle=[0,90,180,270]){
-        rotate([0,0,angle])
-            translate([r-10,0,2])
-                cube([20,6,4], center=true);
+
+module minute_hand(){
+    // Minute hand - longer with 3mm hole at base
+    difference() {
+        color("gray") translate([0,0,5])
+            cube([60,6,2], center=true);
+        translate([24,0,4])
+            cylinder(d=3, h=4, $fn=30);
     }
 }
-
-module hands(){
-    // simplified hands
-    color("gray") translate([0,0,5])
-        cube([60,6,2], center=true); // minute
-    color("gray") translate([0,0,4])
-        cube([40,6,2], center=true); // hour
+    
+module hour_hand(){
+    // Hour hand - shorter with 6mm hole at base
+    difference() {
+        color("gray") translate([0,0,4])
+            cube([40,7,2], center=true);
+        translate([14,0,3])
+            cylinder(d=6, h=4, $fn=35);
+    }
 }
 
 
@@ -141,7 +146,7 @@ module housing(r=125, depth=20, clockwork_slot_size=55, rim_width=5, disc_recess
             // 4 rectangular protrusions with rounded edges at 12, 3, 6, 9 o'clock in disc recess
             for(angle=[0, 90, 180, 270]) {
                 rotate([0, 0, angle])
-                    translate([r - rim_width - 10, 0, depth - disc_recess_depth])
+                    translate([r - 20, 0, depth - disc_recess_depth])
                         linear_extrude(height=disc_recess_depth)
                             offset(r=4)
                                 offset(delta=-4)
@@ -158,7 +163,7 @@ module housing(r=125, depth=20, clockwork_slot_size=55, rim_width=5, disc_recess
             // Subtract the protrusions from the recess so they remain
             for(angle=[0, 90, 180, 270]) {
                 rotate([0, 0, angle])
-                    translate([r - rim_width - 10, 0, depth - disc_recess_depth])
+                    translate([r - 20, 0, depth - disc_recess_depth])
                         linear_extrude(height=disc_recess_depth + 1)
                             offset(r=3)
                                 offset(delta=-4)
@@ -229,16 +234,20 @@ if (render_mode == 0) {
     
 } else if (render_mode == 4) {
     // Mode 4: Hands only (both minute and hour)
-    hands();
+    hour_hand();
+}
+else if (render_mode == 5) {
+    // Mode 5: Hands only (both minute and hour)
+    minute_hand();
     
-} else if (render_mode == 5) {
+} else if (render_mode == 6) {
     // Mode 5: Base only
     base();
     
     
 }
 
-else if (render_mode == 6) {
+else if (render_mode == 7) {
     // Mode 6: Exploded view
     translate([0, 0, 40])
         housing();
